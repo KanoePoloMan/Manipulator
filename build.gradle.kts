@@ -15,6 +15,12 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
+
+    implementation ("org.slf4j:slf4j-api:2.0.16")
+    implementation ("org.slf4j:slf4j-simple:2.0.16")
+    implementation ("com.pi4j:pi4j-core:2.7.0")
+    implementation ("com.pi4j:pi4j-plugin-raspberrypi:2.7.0")
+    implementation ("com.pi4j:pi4j-plugin-gpiod:2.7.0")
 }
 
 tasks.test {

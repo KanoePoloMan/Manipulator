@@ -9,14 +9,14 @@ public class Settings {
     public Pinout pinout;
 
     protected enum Pinout {
-        DIRECTION(0),
-        STEP(0),
-        SLEEP(0),
-        RESET(0),
-        MS3(0),
-        MS2(0),
-        MS1(0),
-        ENABLE(0);
+        DIRECTION(11),
+        STEP(13),
+        SLEEP(15),
+        RESET(16),
+        MS3(18),
+        MS2(19),
+        MS1(21),
+        ENABLE(23);
 
         private final int pin;
 

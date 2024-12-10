@@ -2,15 +2,26 @@ package s21.main;
 
 import java.util.Scanner;
 
-import s21.main.Main.SettingMenus;
+import com.pi4j.Pi4J;
+import com.pi4j.platform.Platforms;
+
+import s21.main.Settings.Pinout;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
+        final Settings settings = new Settings();
+
+        var pi4j = Pi4J.newAutoContext();
+        Platforms platforms = pi4j.platforms();
         
+        var direction_pin = pi4j.digitalOutput().create(Pinout.DIRECTION.getPin());
+        var step_pin = pi4j.digitalOutput().create(Pinout.STEP.getPin());
+        var ms3_pin = pi4j.digitalOutput().create(Pinout.MS3.getPin());
+        var ms2_pin = pi4j.digitalOutput().create(Pinout.MS2.getPin());
+        var ms1_pin = pi4j.digitalOutput().create(Pinout.MS1.getPin());
+
         SettingMenus state = SettingMenus.IDLE;
         try (Scanner in = new Scanner(System.in)) {
-            final Settings settings = new Settings();
-            
             while(state != SettingMenus.EXIT) {
                 switch(state) {
                     case IDLE -> {
@@ -25,12 +36,41 @@ public class Main {
                         settings.direction = !settings.direction;
                         System.out.println("Direction is: " + (settings.direction == false ? "left" : "right"));
                         state = SettingMenus.IDLE;
+                        if(settings.direction == false) direction_pin.high();
+                        else direction_pin.low();
                     }
                     case DELIEMER -> {
                         settings.deliemer *= 2;
                         if(settings.deliemer > 16) settings.deliemer = 1;
                         System.out.println(state.getName() + " is " + settings.deliemer);
                         state = SettingMenus.IDLE;
+                        switch(settings.deliemer) {
+                            case 1 -> {
+                                ms1_pin.low();
+                                ms2_pin.low();
+                                ms3_pin.low();
+                            }
+                            case 2 -> {
+                                ms1_pin.high();
+                                ms2_pin.low();
+                                ms3_pin.low();
+                            }
+                            case 4 -> {
+                                ms1_pin.low();
+                                ms2_pin.high();
+                                ms3_pin.low();
+                            }
+                            case 8 -> {
+                                ms1_pin.high();
+                                ms2_pin.high();
+                                ms3_pin.low();
+                            }
+                            case 16 -> {
+                                ms1_pin.high();
+                                ms2_pin.high();
+                                ms3_pin.high();
+                            }
+                        }
                     }
                     case STEP -> {
                         System.out.println("Insert steps count");
@@ -43,7 +83,8 @@ public class Main {
                             Thread stepsThread = new Thread(()->{
                                 while(settings.steps > 0) {
                                     //step
-                                    System.out.println(settings.steps);
+                                    step_pin.high();
+                                    step_pin.low();
                                     try {
                                         Thread.sleep(1000 / settings.speed);
                                     } catch (InterruptedException e) {
@@ -69,6 +110,7 @@ public class Main {
                 }
             }
         }
+        pi4j.shutdown();
     }
     protected enum SettingMenus {
         IDLE("Idle"),
